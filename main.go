@@ -37,27 +37,27 @@ func calculateTatalPrice(totalSumOfItemPrice int) float32 {
 
 	var itemOfferList []ItemOffer
 	// perform a db.Query insert
-	res1, err := dbutils.DbConn().Query("Select * from itemsOffer where item_total_price != '' and item_total_price <= ? order by item_total_price DESC limit 1", totalSumOfItemPrice)
+	res1, err := dbutils.DbConn().Query("Select item_total_price,item_discount from itemsOffer where item_total_price != '' and item_total_price <= ? order by item_total_price DESC limit 1", totalSumOfItemPrice)
 
 	if err != nil {
 		panic(err.Error())
 	}
 	for res1.Next() {
 		var itemOfferw ItemOffer
-		res1.Scan(&itemOfferw.ID, &itemOfferw.ItemName, &itemOfferw.ItemQty, &itemOfferw.ItemPrice, &itemOfferw.ItemTotalPrice, &itemOfferw.ItemDiscount)
+		res1.Scan(&itemOfferw.ItemTotalPrice, &itemOfferw.ItemDiscount)
 		if err != nil {
 			fmt.Printf(err.Error())
 		}
 
 		itemOfferList = append(itemOfferList, itemOfferw)
 	}
-	fmt.Println("len(res1) ", itemOfferList)
+	// fmt.Println("len(res1) ", itemOfferList)
 	defer res1.Close()
 	var newPrice float32 = float32(totalSumOfItemPrice)
 	// fmt.Println("len(itemOfferList) ", len(itemOfferList))
 	if len(itemOfferList) > 0 {
 		newPrice = float32(totalSumOfItemPrice) - float32(totalSumOfItemPrice*itemOfferList[0].ItemDiscount/100)
-		// fmt.Println("len(itemOfferList) newPrice ", itemOfferList[0].ItemDiscount)
+		// fmt.Println("len(itemOfferList) newPrice ", float32(totalSumOfItemPrice*itemOfferList[0].ItemDiscount/100))
 	}
 
 	return newPrice
